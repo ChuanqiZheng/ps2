@@ -57,7 +57,7 @@ void laserCallback(const sensor_msgs::LaserScan& laser_scan) {
    for(ping_index_i_=ping_index_-40;ping_index_i_<ping_index_+40;ping_index_i_++){
    ping_dist_i_ = laser_scan.ranges[ping_index_i_];
    ping_dist_in_front_ = laser_scan.ranges[ping_index_];
-   if (ping_dist_i_<MIN_SAFE_DISTANCE) {//"q"
+   if (ping_dist_i_<MIN_SAFE_DISTANCE) {
        ROS_WARN("DANGER, WILL ROBINSON!!");
        laser_alarm_=true;
        if(ping_dist_in_front_>=MIN_SAFE_DISTANCE){
@@ -66,7 +66,7 @@ void laserCallback(const sensor_msgs::LaserScan& laser_scan) {
           }
           else obstacle_left_=false;
           }
-       else{//"p"
+       else{
           ping_index_j_ = ping_index_i_;
           former_dist_left_ = ping_dist_i_;
           former_dist_right_ = ping_dist_i_;
@@ -103,9 +103,9 @@ void laserCallback(const sensor_msgs::LaserScan& laser_scan) {
           former_dist_right_ = ping_dist_j_;
           }
           }//"for loop" end
-          }//end of "p"
+          }
        break;
-   }//end of "q"
+   }
    else {
        laser_alarm_=false;
    }
