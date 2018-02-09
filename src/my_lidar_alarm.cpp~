@@ -21,6 +21,16 @@ bool laser_alarm_=false;
 bool obstacle_left_ = false;
 int ping_index_i_ = 0;
 float ping_dist_i_ = 3.0;
+/*int ping_index_left_ = 0;
+float ping_dist_left_ = 3.0;
+int ping_index_right_ = 0;
+float ping_dist_right_ = 3.0;*/
+int ping_index_j_ = 0;
+float ping_dist_j_ = 1.0;
+float former_dist_left_ = 1.0;
+float former_dist_right_ = 1.0;
+float former_dist_valve_ = 1.0;
+int j = 0;
 
 ros::Publisher lidar_alarm_publisher_;
 ros::Publisher lidar_dist_publisher_;
@@ -46,19 +56,59 @@ void laserCallback(const sensor_msgs::LaserScan& laser_scan) {
 
    for(ping_index_i_=ping_index_-40;ping_index_i_<ping_index_+40;ping_index_i_++){
    ping_dist_i_ = laser_scan.ranges[ping_index_i_];
-   if (ping_dist_i_<MIN_SAFE_DISTANCE) {
+   if (ping_dist_i_<MIN_SAFE_DISTANCE) {//"q"
        ROS_WARN("DANGER, WILL ROBINSON!!");
        laser_alarm_=true;
-       if(ping_index_i_>ping_index_){
-       obstacle_left_=true;
-       }
-       else obstacle_left_=false;
+       if((ping_index_i_<(ping_index_-20))||(ping_index_i_>(ping_index_+20))){
+          if(ping_index_i_>ping_index_){
+          obstacle_left_=true;
+          }
+          else obstacle_left_=false;
+          }
+       else{//"p"
+          ping_index_j_ = ping_index_i_;
+          former_dist_left_ = ping_dist_i_;
+          former_dist_right_ = ping_dist_i_;
+          for(j=1;j<300;j++){//loop forever, untill find a gap
+          ping_index_j_ = ping_index_i_+j;//check left
+          ping_dist_j_ = laser_scan.ranges[ping_index_j_];
+          former_dist_valve_ = former_dist_left_+0.3;
+          if(ping_dist_j_ > former_dist_valve_){
+             if (ping_index_j_>ping_index_){
+             obstacle_left_=false;
+             }
+             else{
+             obstacle_left_=true;
+             }
+          break;
+          }
+          else{
+          former_dist_left_ = ping_dist_j_;
+          }
+
+          ping_index_j_ = ping_index_i_-j;//check right
+          ping_dist_j_ = laser_scan.ranges[ping_index_j_];
+          former_dist_valve_ = former_dist_right_+0.3;
+          if(ping_dist_j_ > former_dist_valve_){
+             if (ping_index_j_>ping_index_){
+             obstacle_left_=false;
+             }
+             else{
+             obstacle_left_=true;
+             }
+          break;
+          }
+          else{
+          former_dist_right_ = ping_dist_j_;
+          }
+          }//"for loop" end
+          }//end of "p"
        break;
-   }
+   }//end of "q"
    else {
        laser_alarm_=false;
    }
-   }
+   }//"for loop" end
 
    if (laser_alarm_ == false){
    for(ping_index_i_=ping_index_+40;ping_index_i_<ping_index_+125;ping_index_i_++){
